@@ -4,14 +4,13 @@ import lombok.Data;
 
 @Data
 public class ResultDTO<T> {
-    private Integer code;
-    private String message;
     private T data;
+    private MetaDTO meta;
 
-    public static ResultDTO okOf(){
-        ResultDTO resultDTO = new ResultDTO();
-        resultDTO.setCode(200);
-        resultDTO.setMessage("请求成功");
+    public ResultDTO<T> okOf(T data,MetaDTO meta){
+        ResultDTO<T> resultDTO = new ResultDTO<>();
+        resultDTO.setData(data);
+        resultDTO.setMeta(meta);
         return resultDTO;
     }
 }
