@@ -13,4 +13,13 @@ public class ResultDTO<T> {
         resultDTO.setMeta(meta);
         return resultDTO;
     }
+
+    public static ResultDTO errorOf(int code,String message){
+        ResultDTO resultDTO = new ResultDTO();
+        MetaDTO meta = new MetaDTO();
+        meta.setCode(code);
+        meta.setMessage(message);
+        resultDTO.setMeta(meta);
+        return resultDTO;
+    }
 }

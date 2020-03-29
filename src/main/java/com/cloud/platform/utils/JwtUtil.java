@@ -4,10 +4,12 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 public class JwtUtil {
 
@@ -40,21 +42,25 @@ public class JwtUtil {
         header.put("alg", "HS256");
         //附带username和userId信息生成签名
         return JWT.create().withHeader(header)
-                .withClaim("username", username).withClaim("userId", userId)
+                .withClaim("username", username).withClaim("userRid", userId)
                 .withExpiresAt(date)
                 .sign(algorithm);
     }
 
-    public static boolean verify(String token){
+    public static Map<String,Claim> verify(String token){
+        DecodedJWT jwt;
         try {
             Algorithm algorithm = Algorithm.HMAC256(TOKEN_SECERT);
             JWTVerifier verifier = JWT.require(algorithm).build();
-            DecodedJWT jwt = verifier.verify(token);
-            return true;
+            jwt = verifier.verify(token);
         }catch (IllegalArgumentException | JWTVerificationException e){
-            return false;
+            throw new RuntimeException(e);
         }
+        return jwt.getClaims();
+    }
 
+    public static boolean isTokenExpired(Date expiration){
+        return expiration.before(new Date());
     }
 
 }

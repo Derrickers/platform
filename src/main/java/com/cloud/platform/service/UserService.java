@@ -39,7 +39,7 @@ public class UserService {
             }else{
                 UserDTO userDTO = new UserDTO();
                 BeanUtils.copyProperties(users.get(0),userDTO);
-                userDTO.setToken(JwtUtil.sign(userDTO.getUsername(),userDTO.getId()));
+                userDTO.setToken(JwtUtil.sign(userDTO.getUsername(),userDTO.getRid()));
                 resultDTO.setData(userDTO);
                 MetaDTO meta = new MetaDTO();
                 meta.setCode(ResponseType.SUCCESS.getValue());
