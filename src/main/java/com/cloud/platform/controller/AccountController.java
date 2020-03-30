@@ -1,5 +1,6 @@
 package com.cloud.platform.controller;
 
+import com.cloud.platform.DTO.ResultDTO;
 import com.cloud.platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,7 +28,7 @@ public class AccountController {
                            @RequestParam(name = "query",required = false) String query,
                            @RequestParam(name = "pagenum",defaultValue = "1") Integer pagenum,
                            @RequestParam(name = "pagesize",defaultValue = "2") Integer pagesize){
-        return userService.getUserPagination((Integer) request.getSession().getAttribute("userRid"),pagenum,pagesize);
+        return userService.getUserPagination((Integer) request.getSession().getAttribute("userRid"),pagenum,pagesize,query);
     }
 
     @PutMapping("/users/{id}/state/{mgState}")
@@ -35,5 +36,15 @@ public class AccountController {
     public Object changeUserState(@PathVariable(value = "id")Integer id,
                                   @PathVariable(value = "mgState") boolean newState){
         return userService.updateUserStateById(id,newState);
+    }
+
+    @PostMapping("/users")
+    @ResponseBody
+    public Object addUser(@RequestParam Map<String,String> params){
+        String username = params.get("username");
+        String password = params.get("password");
+        String email = params.get("email");
+        String mobile = params.get("mobile");
+        return userService.addUser(username,password,email,mobile);
     }
 }

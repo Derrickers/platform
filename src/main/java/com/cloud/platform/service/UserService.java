@@ -35,16 +35,17 @@ public class UserService {
                 BeanUtils.copyProperties(users.get(0),userDTO);
                 userDTO.setToken(JwtUtil.sign(userDTO.getUsername(),userDTO.getRid()));
                 resultDTO.setData(userDTO);
-                resultDTO.setMeta(MetaDTO.okOf("登陆成功"));
+                resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"登陆成功"));
             }
         }
         return resultDTO;
     }
 
-    public ResultDTO<PaginationDTO> getUserPagination(Integer userRid, Integer pagenum, Integer pagesize) {
+    public ResultDTO<PaginationDTO> getUserPagination(Integer userRid, Integer pagenum, Integer pagesize, String query) {
         ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();
         PaginationDTO<List<UserListDTO>> paginationDTO = new PaginationDTO<>();
         UserExample userExample = new UserExample();
+        userExample.createCriteria().andUsernameLike("%"+query+"%");
         long totalNum = userMapper.countByExample(userExample);
         paginationDTO.setTotal((int) totalNum);
         paginationDTO.setPagenum(pagenum);
@@ -57,7 +58,7 @@ public class UserService {
         });
         paginationDTO.setData(userListDTOS);
         resultDTO.setData(paginationDTO);
-        resultDTO.setMeta(MetaDTO.okOf("获取管理员用户名单成功"));
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"获取管理员用户名单成功"));
         return resultDTO;
     }
 
@@ -69,7 +70,35 @@ public class UserService {
         if(i == 0)
             resultDTO.setMeta(MetaDTO.errorOf(ResponseType.FAIL.getValue(),"修改状态失败"));
         else
-            resultDTO.setMeta(MetaDTO.okOf("修改状态成功"));
+            resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"修改状态成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO<Object> addUser(String username, String password, String email, String mobile) {
+        ResultDTO<Object> resultDTO = new ResultDTO<>();
+        UserExample userExample = new UserExample();
+        userExample.createCriteria().andUsernameEqualTo(username);
+        List<User> users = userMapper.selectByExample(userExample);
+        if(users.size()!=0){
+            resultDTO.setMeta(MetaDTO.errorOf(ResponseType.ERROR.getValue(),"用户名已存在"));
+        }else{
+            User user = new User();
+            user.setMgState(true);
+            user.setUsername(username);
+            user.setEmail(email);
+            user.setGmtCreate(System.currentTimeMillis());
+            user.setGmtModify(null);
+            user.setMobile(mobile);
+            user.setRid(1);
+            user.setRoleName("测试用户");
+            user.setPassword(password);
+            int insert = userMapper.insert(user);
+            if(insert == 0){
+                resultDTO.setMeta(MetaDTO.errorOf(ResponseType.ERROR.getValue(),"服务器异常，用户注册失败"));
+            }else{
+                resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue()+1,"注册成功"));
+            }
+        }
         return resultDTO;
     }
 }

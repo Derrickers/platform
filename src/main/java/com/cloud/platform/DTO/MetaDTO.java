@@ -11,9 +11,9 @@ public class MetaDTO {
     private Integer code;
     private String message;
 
-    public static MetaDTO okOf(String message) {
+    public static MetaDTO okOf(int code,String message) {
         MetaDTO metaDTO = new MetaDTO();
-        metaDTO.setCode(ResponseType.SUCCESS.getValue());
+        metaDTO.setCode(code);
         metaDTO.setMessage(message);
         return metaDTO;
     }
