@@ -1,17 +1,17 @@
 package com.cloud.platform.service;
 
-import com.cloud.platform.DTO.MetaDTO;
-import com.cloud.platform.DTO.ResultDTO;
-import com.cloud.platform.DTO.UserDTO;
+import com.cloud.platform.DTO.*;
 import com.cloud.platform.Enum.ResponseType;
 import com.cloud.platform.mapper.UserMapper;
 import com.cloud.platform.model.User;
 import com.cloud.platform.model.UserExample;
 import com.cloud.platform.utils.JwtUtil;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,28 +25,51 @@ public class UserService {
         userExample.createCriteria().andUsernameEqualTo(username);
         List<User> users = userMapper.selectByExample(userExample);
         if(users.size() == 0){
-            MetaDTO meta = new MetaDTO();
-            meta.setCode(ResponseType.FAIL.getValue());
-            meta.setMessage("该用户不存在");
-            resultDTO.setMeta(meta);
+            resultDTO.setMeta(MetaDTO.errorOf(ResponseType.FAIL.getValue(),"用户不存在"));
         }else{
             User dbUser = users.get(0);
             if(!dbUser.getPassword().equals(password)){
-                MetaDTO meta = new MetaDTO();
-                meta.setCode(ResponseType.FAIL.getValue());
-                meta.setMessage("密码错误");
-                resultDTO.setMeta(meta);
+                resultDTO.setMeta(MetaDTO.errorOf(ResponseType.FAIL.getValue(),"密码错误"));
             }else{
                 UserDTO userDTO = new UserDTO();
                 BeanUtils.copyProperties(users.get(0),userDTO);
                 userDTO.setToken(JwtUtil.sign(userDTO.getUsername(),userDTO.getRid()));
                 resultDTO.setData(userDTO);
-                MetaDTO meta = new MetaDTO();
-                meta.setCode(ResponseType.SUCCESS.getValue());
-                meta.setMessage("登陆成功");
-                resultDTO.setMeta(meta);
+                resultDTO.setMeta(MetaDTO.okOf("登陆成功"));
             }
         }
+        return resultDTO;
+    }
+
+    public ResultDTO<PaginationDTO> getUserPagination(Integer userRid, Integer pagenum, Integer pagesize) {
+        ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();
+        PaginationDTO<List<UserListDTO>> paginationDTO = new PaginationDTO<>();
+        UserExample userExample = new UserExample();
+        long totalNum = userMapper.countByExample(userExample);
+        paginationDTO.setTotal((int) totalNum);
+        paginationDTO.setPagenum(pagenum);
+        List<User> users = userMapper.selectByExampleWithRowbounds(userExample, new RowBounds(pagesize * (pagenum - 1), pagesize));
+        List<UserListDTO> userListDTOS = new ArrayList<>();
+        users.stream().forEach(user -> {
+            UserListDTO userListDTO = new UserListDTO();
+            BeanUtils.copyProperties(user, userListDTO);
+            userListDTOS.add(userListDTO);
+        });
+        paginationDTO.setData(userListDTOS);
+        resultDTO.setData(paginationDTO);
+        resultDTO.setMeta(MetaDTO.okOf("获取管理员用户名单成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO<Object> updateUserStateById(Integer id, boolean newState) {
+        ResultDTO<Object> resultDTO = new ResultDTO<>();
+        User user = userMapper.selectByPrimaryKey(id);
+        user.setMgState(newState);
+        int i = userMapper.updateByPrimaryKey(user);
+        if(i == 0)
+            resultDTO.setMeta(MetaDTO.errorOf(ResponseType.FAIL.getValue(),"修改状态失败"));
+        else
+            resultDTO.setMeta(MetaDTO.okOf("修改状态成功"));
         return resultDTO;
     }
 }

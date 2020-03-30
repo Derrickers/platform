@@ -2,9 +2,7 @@ package com.cloud.platform.interceptor;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.cloud.platform.utils.JwtUtil;
-import com.cloud.platform.utils.UrlUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -16,7 +14,6 @@ import java.util.Map;
 public class TokenInteceptor implements HandlerInterceptor {
 
     @Override
-    @CrossOrigin(value = UrlUtils.CROS,maxAge = 1800,allowedHeaders = "*")
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if(request.getMethod().equals("OPTIONS"))
             return true;
