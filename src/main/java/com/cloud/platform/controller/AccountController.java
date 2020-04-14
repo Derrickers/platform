@@ -31,11 +31,13 @@ public class AccountController {
         return userService.getUserPagination((Integer) request.getSession().getAttribute("userRid"),pagenum,pagesize,query);
     }
 
-    @PutMapping("/users/{id}/state/{mgState}")
+    @PostMapping("/users/modifyPass")
     @ResponseBody
-    public Object changeUserState(@PathVariable(value = "id")Integer id,
-                                  @PathVariable(value = "mgState") boolean newState){
-        return userService.updateUserStateById(id,newState);
+    public Object modifyPassword(HttpServletRequest request,
+                                 @RequestParam(name = "oldPass") String oldPass,
+                                 @RequestParam(name = "newPass") String newPass){
+        Integer userId = (Integer) request.getAttribute("userId");
+        return userService.modifyPassword(userId,oldPass,newPass);
     }
 
     @PostMapping("/users")

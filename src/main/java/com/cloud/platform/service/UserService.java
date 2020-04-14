@@ -33,7 +33,7 @@ public class UserService {
             }else{
                 UserDTO userDTO = new UserDTO();
                 BeanUtils.copyProperties(users.get(0),userDTO);
-                userDTO.setToken(JwtUtil.sign(userDTO.getUsername(),userDTO.getRid()));
+                userDTO.setToken(JwtUtil.sign(userDTO.getUsername(),userDTO.getId()));
                 resultDTO.setData(userDTO);
                 resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"登陆成功"));
             }
@@ -99,6 +99,20 @@ public class UserService {
                 resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue()+1,"注册成功"));
             }
         }
+        return resultDTO;
+    }
+
+    public ResultDTO modifyPassword(Integer userId, String oldPass, String newPass) {
+        User user = userMapper.selectByPrimaryKey(userId);
+        if(user ==null){
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"用户不存在");
+        }else if(!user.getPassword().equals(oldPass)){
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"原始密码错误");
+        }
+        user.setPassword(newPass);
+        userMapper.updateByPrimaryKey(user);
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"修改密码成功，请重新登陆"));
         return resultDTO;
     }
 }

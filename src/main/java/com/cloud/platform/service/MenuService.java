@@ -13,10 +13,7 @@ public class MenuService {
 
     public ResultDTO<ArrayList<MenuDTO>> getMenuByRid(Integer userRid) {
         ResultDTO<ArrayList<MenuDTO>> resultDTO = new ResultDTO<>();
-        MetaDTO meta = new MetaDTO();
-        meta.setCode(200);
-        meta.setMessage("获取菜单成功");
-        resultDTO.setMeta(meta);
+        resultDTO.setMeta(MetaDTO.okOf(200,"获取菜单成功"));
         resultDTO.setData(MenuDTO.getAdminMenu());
         return resultDTO;
     }

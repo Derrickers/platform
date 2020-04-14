@@ -37,6 +37,22 @@
             <!--设置为false，自动生成驼峰标示-->
             <property name="useActualColumnNames" value="false"/>
         </table>
+        <table schema="DB2ADMIN" tableName="servers_info" domainObjectName="ServerInfo" >
+            <!--设置为false，自动生成驼峰标示-->
+            <property name="useActualColumnNames" value="false"/>
+        </table>
+        <table schema="DB2ADMIN" tableName="repair_order" domainObjectName="RepairOrder" >
+            <!--设置为false，自动生成驼峰标示-->
+            <property name="useActualColumnNames" value="false"/>
+        </table>
+        <table schema="DB2ADMIN" tableName="detect_order" domainObjectName="DetectOrder" >
+            <!--设置为false，自动生成驼峰标示-->
+            <property name="useActualColumnNames" value="false"/>
+        </table>
+        <table schema="DB2ADMIN" tableName="device_error_code" domainObjectName="DeviceErrorCode" >
+            <!--设置为false，自动生成驼峰标示-->
+            <property name="useActualColumnNames" value="false"/>
+        </table>
 
     </context>
 </generatorConfiguration>

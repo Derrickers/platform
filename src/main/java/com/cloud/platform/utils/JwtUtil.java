@@ -42,7 +42,7 @@ public class JwtUtil {
         header.put("alg", "HS256");
         //附带username和userId信息生成签名
         return JWT.create().withHeader(header)
-                .withClaim("username", username).withClaim("userRid", userId)
+                .withClaim("username", username).withClaim("userId", userId)
                 .withExpiresAt(date)
                 .sign(algorithm);
     }
