@@ -11,18 +11,11 @@ import com.cloud.platform.model.DetectOrder;
 import com.cloud.platform.model.DetectOrderExample;
 import com.cloud.platform.model.RepairOrder;
 import com.cloud.platform.model.RepairOrderExample;
-import com.cloud.platform.utils.DateUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 @Service
@@ -63,17 +56,7 @@ public class OrderService {
         DetectOrderExample.Criteria detectOrderExampleCriteria = detectOrderExample.createCriteria();
         detectOrderExampleCriteria.andOrderIndexLike("%" + query + "%");
         if (date != null && !"".equals(date)) {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS SSSS");
-            Date sqlDate = Date.valueOf(date);
-            try {
-                System.out.println(sqlDate.toString());
-                java.util.Date parse = format.parse(sqlDate.toString());
-                System.out.println(parse);
-            } catch (ParseException e) {
-                return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"日期输入有误");
-            }
-
-            //detectOrderExampleCriteria.andDetectDateEqualTo(time);
+            detectOrderExampleCriteria.andDetectDateEqualTo(date);
         }
         if (affiliation != null && !"".equals(affiliation)) {
             detectOrderExampleCriteria.andAffiliationEqualTo(affiliation);
@@ -83,10 +66,9 @@ public class OrderService {
         }
         List<DetectOrder> detectOrders = detectOrderMapper.selectByExampleWithRowbounds(detectOrderExample, new RowBounds((page - 1) * size, size));
         List<DetectOrderDTO> detectOrderDTOS = new ArrayList<>();
-        detectOrders.stream().forEach(item->{
+        detectOrders.forEach(item->{
             DetectOrderDTO target = new DetectOrderDTO();
             BeanUtils.copyProperties(item, target);
-            target.setDetectDate(DateUtils.SimpleFormatDate(item.getDetectDate()));
             detectOrderDTOS.add(target);
         });
         ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();

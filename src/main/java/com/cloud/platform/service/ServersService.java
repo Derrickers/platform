@@ -36,12 +36,6 @@ public class ServersService {
         serverInfos.stream().forEach(server->{
             ServerDTO target = new ServerDTO();
             BeanUtils.copyProperties(server, target);
-            target.setCreateTime(DateUtils.SimpleFormatDate(server.getCreateTime()));
-            target.setIssueTime(DateUtils.SimpleFormatDate(server.getIssueTime()));
-            target.setManageBegintime(DateUtils.SimpleFormatDate(server.getManageBegintime()));
-            target.setManageEndtime(DateUtils.SimpleFormatDate(server.getManageEndtime()));
-            target.setSecureBegintime(DateUtils.SimpleFormatDate(server.getSecureBegintime()));
-            target.setSecureEndtime(DateUtils.SimpleFormatDate(server.getSecureEndtime()));
             serverDTOS.add(target);
         });
         ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();
