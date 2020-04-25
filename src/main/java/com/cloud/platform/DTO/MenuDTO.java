@@ -41,7 +41,8 @@ public class MenuDTO {
         children2.add(generateMenuDTO(303,"资产设备设施","asset",new ArrayList<>()));
         children2.add(generateMenuDTO(305,"配件类型","accessoryType",new ArrayList<>()));
         children2.add(generateMenuDTO(306,"配件设施","accessoryDevice",new ArrayList<>()));
-        children2.add(generateMenuDTO(307,"非资产类型","unAsset",new ArrayList<>()));
+        children2.add(generateMenuDTO(307,"非资产类型","unAssetType",new ArrayList<>()));
+        children2.add(generateMenuDTO(308,"非资产类型设备设施","unAssetDevice",new ArrayList<>()));
         menuDTOS.add(generateMenuDTO(3,"设备管理","devices", children2));
         ArrayList<MenuDTO> children3 = new ArrayList<>();
         children3.add(generateMenuDTO(401,"角色管理","roles",new ArrayList<>()));

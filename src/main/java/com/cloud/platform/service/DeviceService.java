@@ -2,6 +2,7 @@ package com.cloud.platform.service;
 
 import com.cloud.platform.DTO.*;
 import com.cloud.platform.Enum.ResponseType;
+import com.cloud.platform.mapper.AccessoryTypeMapper;
 import com.cloud.platform.mapper.DeviceAssetGoodMapper;
 import com.cloud.platform.mapper.DeviceClassificationMapper;
 import com.cloud.platform.mapper.DeviceErrorCodeMapper;
@@ -11,6 +12,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,6 +31,9 @@ public class DeviceService {
 
     @Autowired
     private DeviceAssetGoodMapper deviceAssetGoodMapper;
+
+    @Autowired
+    private AccessoryTypeMapper accessoryTypeMapper;
 
     public ResultDTO<PaginationDTO> getDeviceErrorCode(int page, int size, String classification, String code, String query) {
         ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();
@@ -135,8 +140,8 @@ public class DeviceService {
     }
 
     public ResultDTO addNewClassification(String classification, String classificationCode, int level) {
-        if(level>3||level<1)
-            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"设备层级应在1到3之间");
+        if (level > 3 || level < 1)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(), "设备层级应在1到3之间");
         DeviceClassification deviceClassification = new DeviceClassification();
         deviceClassification.setClassification(classification);
         DeviceClassificationExample deviceClassificationExample = new DeviceClassificationExample();
@@ -160,13 +165,13 @@ public class DeviceService {
     }
 
     public ResultDTO modifyClassification(int id, String classification, String classificationCode, Integer level) {
-        if(level>3||level<1)
-            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"设备层级应在1到3之间");
+        if (level > 3 || level < 1)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(), "设备层级应在1到3之间");
         DeviceClassificationExample deviceClassificationExample = new DeviceClassificationExample();
         deviceClassificationExample.createCriteria().andClassificationCodeEqualTo(classificationCode);
         List<DeviceClassification> deviceClassifications = deviceClassificationMapper.selectByExample(deviceClassificationExample);
-        if(deviceClassifications!=null&&deviceClassifications.size()!=0)
-            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"设备类型码已存在，请重新设置");
+        if (deviceClassifications != null && deviceClassifications.size() != 0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(), "设备类型码已存在，请重新设置");
         DeviceClassification deviceClassification = deviceClassificationMapper.selectByPrimaryKey(id);
         deviceClassification.setLevel(level);
         deviceClassification.setClassificationCode(classificationCode);
@@ -184,25 +189,25 @@ public class DeviceService {
         DeviceAssetGoodExample.Criteria deviceAssetGoodExampleCriteria = deviceAssetGoodExample.createCriteria();
         long total = deviceAssetGoodMapper.countByExample(deviceAssetGoodExample);
         paginationDTO.setTotal((int) total);
-        paginationDTO.setPagenum((int) (total/size));
-        if(affiliation!=null&&!"".equals(affiliation))
+        paginationDTO.setPagenum((int) (total / size));
+        if (affiliation != null && !"".equals(affiliation))
             deviceAssetGoodExampleCriteria.andAffiliationEqualTo(affiliation);
-        if(classification!=null&&!"".equals(classification))
+        if (classification != null && !"".equals(classification))
             deviceAssetGoodExampleCriteria.andClassificationEqualTo(classification);
-        if(manufacture!=null&&!"".equals(manufacture))
-            deviceAssetGoodExampleCriteria.andManufactureLike("%"+manufacture+"%");
-        if(deviceName!=null&&!"".equals(deviceName))
-            deviceAssetGoodExampleCriteria.andDeviceNameLike("%"+deviceName+"%");
+        if (manufacture != null && !"".equals(manufacture))
+            deviceAssetGoodExampleCriteria.andManufactureLike("%" + manufacture + "%");
+        if (deviceName != null && !"".equals(deviceName))
+            deviceAssetGoodExampleCriteria.andDeviceNameLike("%" + deviceName + "%");
         List<DeviceAssetGood> deviceAssetGoods = deviceAssetGoodMapper.selectByExampleWithRowbounds(deviceAssetGoodExample, new RowBounds((page - 1) * size, size));
         List<DeviceAssetGoodDTO> deviceAssetGoodDTOS = new ArrayList<>();
-        deviceAssetGoods.forEach(item->{
+        deviceAssetGoods.forEach(item -> {
             DeviceAssetGoodDTO deviceAssetGoodDTO = new DeviceAssetGoodDTO();
-            BeanUtils.copyProperties(item,deviceAssetGoodDTO);
+            BeanUtils.copyProperties(item, deviceAssetGoodDTO);
             deviceAssetGoodDTOS.add(deviceAssetGoodDTO);
         });
         paginationDTO.setData(deviceAssetGoodDTOS);
         resultDTO.setData(paginationDTO);
-        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"获取资产设备列表成功"));
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(), "获取资产设备列表成功"));
         return resultDTO;
     }
 
@@ -240,7 +245,7 @@ public class DeviceService {
         deviceAssetGood.setWarrantyDate(warrantyDate);
         deviceAssetGoodMapper.insert(deviceAssetGood);
         ResultDTO resultDTO = new ResultDTO();
-        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"创建新资产设备成功"));
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(), "创建新资产设备成功"));
         return resultDTO;
     }
 
@@ -262,8 +267,8 @@ public class DeviceService {
         String status = params.get("status");
 
         DeviceAssetGood deviceAssetGood = deviceAssetGoodMapper.selectByPrimaryKey(id);
-        if(deviceAssetGood == null)
-            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"该条记录已被删除，请刷新列表");
+        if (deviceAssetGood == null)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(), "该条记录已被删除，请刷新列表");
         deviceAssetGood.setAffiliation(affiliation);
         deviceAssetGood.setAssetCode(assetCode);
         deviceAssetGood.setClassification(classification);
@@ -281,14 +286,80 @@ public class DeviceService {
         deviceAssetGood.setWarrantyDate(warrantyDate);
         deviceAssetGoodMapper.updateByPrimaryKey(deviceAssetGood);
         ResultDTO resultDTO = new ResultDTO();
-        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"更新新资产设备成功"));
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(), "更新新资产设备成功"));
         return resultDTO;
     }
 
     public ResultDTO deleteAssetDevice(Integer id) {
         int i = deviceAssetGoodMapper.deleteByPrimaryKey(id);
-        if(i == 0)
-            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"删除失败");
+        if (i == 0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(), "删除失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(), "删除成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO getAccessoryTypeList(int page, int size, String deviceType, String accessoryType) {
+        AccessoryTypeExample accessoryTypeExample = new AccessoryTypeExample();
+        long total = accessoryTypeMapper.countByExample(accessoryTypeExample);
+        PaginationDTO<List<AccessoryType>> paginationDTO = new PaginationDTO<>();
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total / size));
+        AccessoryTypeExample.Criteria accessoryTypeExampleCriteria = accessoryTypeExample.createCriteria();
+        if(deviceType!=null&&!"".equals(deviceType))
+            accessoryTypeExampleCriteria.andDeviceTypeEqualTo(deviceType);
+        if(accessoryType!=null&&!"".equals(accessoryType))
+            accessoryTypeExampleCriteria.andAccessoryTypeNameLike("%"+accessoryType+"%");
+        List<AccessoryType> accessoryTypes = accessoryTypeMapper.selectByExampleWithRowbounds(accessoryTypeExample, new RowBounds((page - 1) * size, size));
+        paginationDTO.setData(accessoryTypes);
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"获取配件类型列表成功"));
+        resultDTO.setData(paginationDTO);
+        return resultDTO;
+    }
+
+    public ResultDTO addNewAccessoryType(String deviceType, String accessoryTypeIndex, String accessoryTypeName) {
+        AccessoryTypeExample accessoryTypeExample = new AccessoryTypeExample();
+        accessoryTypeExample.createCriteria().andAccessoryTypeIndexEqualTo(accessoryTypeIndex);
+        List<AccessoryType> accessoryTypes = accessoryTypeMapper.selectByExample(accessoryTypeExample);
+        if(accessoryTypes!=null&&accessoryTypes.size()!=0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"配件类型编号已存在，请重新设置");
+        AccessoryType accessoryType = new AccessoryType();
+        accessoryType.setDeviceType(deviceType);
+        accessoryType.setAccessoryTypeIndex(accessoryTypeIndex);
+        accessoryType.setAccessoryTypeName(accessoryTypeName);
+        int code = accessoryTypeMapper.insert(accessoryType);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，插入失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"插入成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO modifyAccessoryType(int id, String deviceType, String accessoryTypeIndex, String accessoryTypeName) {
+        AccessoryType accessoryType = accessoryTypeMapper.selectByPrimaryKey(id);
+        if(accessoryType==null)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"该条记录已被删除");
+        AccessoryTypeExample accessoryTypeExample = new AccessoryTypeExample();
+        accessoryTypeExample.createCriteria().andAccessoryTypeIndexEqualTo(accessoryTypeIndex);
+        List<AccessoryType> accessoryTypes = accessoryTypeMapper.selectByExample(accessoryTypeExample);
+        if(accessoryTypes!=null&&accessoryTypes.size()!=0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"配件类型编号已存在，请重新设置");
+        accessoryType.setAccessoryTypeName(accessoryTypeName);
+        accessoryType.setAccessoryTypeIndex(accessoryTypeIndex);
+        accessoryType.setDeviceType(deviceType);
+        int code = accessoryTypeMapper.updateByPrimaryKey(accessoryType);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，更新失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"更新成功"));
+        return resultDTO;
+    }
+
+    public Object deleteAccessoryType(Integer id) {
+        int code = accessoryTypeMapper.deleteByPrimaryKey(id);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，删除失败");
         ResultDTO resultDTO = new ResultDTO();
         resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"删除成功"));
         return resultDTO;

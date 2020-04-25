@@ -116,4 +116,38 @@ public class DeviceController {
         return deviceService.deleteAssetDevice(id);
     }
 
+    @GetMapping("/accessoryType")
+    @ResponseBody
+    public Object getAccessoryType(@RequestParam Map<String,String> params){
+        int page = Integer.parseInt(params.get("page"));
+        int size = Integer.parseInt(params.get("size"));
+        String deviceType = params.get("deviceType");
+        String accessoryType = params.get("accessoryType");
+        return deviceService.getAccessoryTypeList(page,size,deviceType,accessoryType);
+    }
+
+    @PostMapping("/newAccessoryType")
+    @ResponseBody
+    public Object addNewAccessoryType(@RequestParam Map<String,String> params){
+        String deviceType = params.get("deviceType");
+        String accessoryTypeIndex = params.get("accessoryTypeIndex");
+        String accessoryTypeName = params.get("accessoryTypeName");
+        return deviceService.addNewAccessoryType(deviceType,accessoryTypeIndex,accessoryTypeName);
+    }
+
+    @PostMapping("/modifyAccessoryType")
+    @ResponseBody
+    public Object modifyAccessoryType(@RequestParam Map<String,String> params){
+        int id = Integer.parseInt(params.get("id"));
+        String deviceType = params.get("deviceType");
+        String accessoryTypeIndex = params.get("accessoryTypeIndex");
+        String accessoryTypeName = params.get("accessoryTypeName");
+        return deviceService.modifyAccessoryType(id,deviceType,accessoryTypeIndex,accessoryTypeName);
+    }
+
+    @PostMapping("/deleteAccessoryType")
+    @ResponseBody
+    public Object deleteAccessoryType(@RequestParam(name = "id") Integer id){
+        return deviceService.deleteAccessoryType(id);
+    }
 }
