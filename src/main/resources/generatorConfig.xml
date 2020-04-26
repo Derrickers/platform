@@ -73,5 +73,14 @@
             <property name="useActualColumnNames" value="false"/>
         </table>
 
+        <table schema="DB2ADMIN" tableName="accessory_device" domainObjectName="AccessoryDevice" >
+            <!--设置为false，自动生成驼峰标示-->
+            <property name="useActualColumnNames" value="false"/>
+        </table>
+
+        <table schema="DB2ADMIN" tableName="un_asset_type" domainObjectName="UnAssetType" >
+            <!--设置为false，自动生成驼峰标示-->
+            <property name="useActualColumnNames" value="false"/>
+        </table>
     </context>
 </generatorConfiguration>

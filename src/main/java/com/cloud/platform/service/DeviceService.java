@@ -2,10 +2,7 @@ package com.cloud.platform.service;
 
 import com.cloud.platform.DTO.*;
 import com.cloud.platform.Enum.ResponseType;
-import com.cloud.platform.mapper.AccessoryTypeMapper;
-import com.cloud.platform.mapper.DeviceAssetGoodMapper;
-import com.cloud.platform.mapper.DeviceClassificationMapper;
-import com.cloud.platform.mapper.DeviceErrorCodeMapper;
+import com.cloud.platform.mapper.*;
 import com.cloud.platform.model.*;
 import com.cloud.platform.utils.DateUtils;
 import org.apache.ibatis.session.RowBounds;
@@ -34,6 +31,12 @@ public class DeviceService {
 
     @Autowired
     private AccessoryTypeMapper accessoryTypeMapper;
+
+    @Autowired
+    private AccessoryDeviceMapper accessoryDeviceMapper;
+
+    @Autowired
+    private UnAssetTypeMapper unAssetTypeMapper;
 
     public ResultDTO<PaginationDTO> getDeviceErrorCode(int page, int size, String classification, String code, String query) {
         ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();
@@ -358,6 +361,132 @@ public class DeviceService {
 
     public Object deleteAccessoryType(Integer id) {
         int code = accessoryTypeMapper.deleteByPrimaryKey(id);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，删除失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"删除成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO getAccessoryDevice(int page, int size, String affiliation, String accessoryName, String accessoryType) {
+        AccessoryDeviceExample accessoryDeviceExample = new AccessoryDeviceExample();
+        long total = accessoryDeviceMapper.countByExample(accessoryDeviceExample);
+        PaginationDTO<List<AccessoryDevice>> paginationDTO = new PaginationDTO<>();
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total / size));
+        AccessoryDeviceExample.Criteria accessoryDeviceExampleCriteria = accessoryDeviceExample.createCriteria();
+        if(affiliation!=null&&!"".equals(affiliation))
+            accessoryDeviceExampleCriteria.andAffiliationEqualTo(affiliation);
+        if(accessoryName!=null&&!"".equals(accessoryName))
+            accessoryDeviceExampleCriteria.andAccessoryNameLike("%"+accessoryName+"%");
+        if(accessoryType!=null&&!"".equals(accessoryType))
+            accessoryDeviceExampleCriteria.andAccessoryTypeEqualTo(accessoryType);
+        List<AccessoryDevice> accessoryDevices = accessoryDeviceMapper.selectByExampleWithRowbounds(accessoryDeviceExample, new RowBounds((page - 1) * size, size));
+        paginationDTO.setData(accessoryDevices);
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"获取配件类型列表成功"));
+        resultDTO.setData(paginationDTO);
+        return resultDTO;
+    }
+
+    public ResultDTO addNewAccessoryDevice(String affiliation, String affiliateDevice, String accessoryType, String accessoryName) {
+        AccessoryDevice accessoryDevice = new AccessoryDevice();
+        accessoryDevice.setAccessoryName(accessoryName);
+        accessoryDevice.setAccessoryType(accessoryType);
+        accessoryDevice.setAffiliateDevice(affiliateDevice);
+        accessoryDevice.setAffiliation(affiliation);
+        int code = accessoryDeviceMapper.insert(accessoryDevice);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，插入失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"新增成功"));
+        return resultDTO;
+    }
+
+    public Object modifyAccessoryDevice(int id, String affiliation, String affiliateDevice, String accessoryType, String accessoryName) {
+        AccessoryDevice accessoryDevice = accessoryDeviceMapper.selectByPrimaryKey(id);
+        if(accessoryDevice == null)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"该条记录已被删除，请重试");
+        accessoryDevice.setAffiliation(affiliation);
+        accessoryDevice.setAffiliateDevice(affiliateDevice);
+        accessoryDevice.setAccessoryType(accessoryType);
+        accessoryDevice.setAccessoryName(accessoryName);
+        int code = accessoryDeviceMapper.updateByPrimaryKey(accessoryDevice);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，更新失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"更新成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO deleteAccessoryDevice(Integer id) {
+        int code = accessoryDeviceMapper.deleteByPrimaryKey(id);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，删除失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"删除成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO getUnAssetTypeList(int page, int size, String deviceType, String unAssetTypeName) {
+        PaginationDTO<List<UnAssetType>> paginationDTO = new PaginationDTO<>();
+        UnAssetTypeExample unAssetTypeExample = new UnAssetTypeExample();
+        long total = unAssetTypeMapper.countByExample(unAssetTypeExample);
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total/size));
+        UnAssetTypeExample.Criteria unAssetTypeExampleCriteria = unAssetTypeExample.createCriteria();
+        if(deviceType!=null&&!"".equals(deviceType))
+            unAssetTypeExampleCriteria.andDeviceTypeEqualTo(deviceType);
+        if(unAssetTypeName!=null&&!"".equals(unAssetTypeName))
+            unAssetTypeExampleCriteria.andUnAssetTypeNameLike("%"+unAssetTypeName+"%");
+        List<UnAssetType> unAssetTypes = unAssetTypeMapper.selectByExampleWithRowbounds(unAssetTypeExample, new RowBounds((page - 1) * size, size));
+        paginationDTO.setData(unAssetTypes);
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setData(paginationDTO);
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"获取非资产类型列表成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO addNewUnAssetType(String deviceType, String unAssetTypeIndex, String unAssetTypeName) {
+        UnAssetTypeExample unAssetTypeExample = new UnAssetTypeExample();
+        unAssetTypeExample.createCriteria().andUnAssetTypeIndexEqualTo(unAssetTypeIndex);
+        List<UnAssetType> unAssetTypes = unAssetTypeMapper.selectByExample(unAssetTypeExample);
+        if(unAssetTypes!=null&&unAssetTypes.size()!=0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"该非资产类型编号已存在，请重新输入");
+        UnAssetType unAssetType = new UnAssetType();
+        unAssetType.setDeviceType(deviceType);
+        unAssetType.setUnAssetTypeIndex(unAssetTypeIndex);
+        unAssetType.setUnAssetTypeName(unAssetTypeName);
+        int code = unAssetTypeMapper.insert(unAssetType);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，插入失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"新增成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO modifyNewUnAssetType(int id, String deviceType, String unAssetTypeIndex, String unAssetTypeName) {
+        UnAssetType unAssetType = unAssetTypeMapper.selectByPrimaryKey(id);
+        if(unAssetType==null)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"该条记录已被删除，请重新选择");
+        UnAssetTypeExample unAssetTypeExample = new UnAssetTypeExample();
+        unAssetTypeExample.createCriteria().andUnAssetTypeIndexEqualTo(unAssetTypeIndex);
+        List<UnAssetType> unAssetTypes = unAssetTypeMapper.selectByExample(unAssetTypeExample);
+        if(unAssetTypes!=null&&unAssetTypes.size()!=0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"该非资产类型编号已存在，请重新输入");
+        unAssetType.setDeviceType(deviceType);
+        unAssetType.setUnAssetTypeIndex(unAssetTypeIndex);
+        unAssetType.setUnAssetTypeName(unAssetTypeName);
+        int code = unAssetTypeMapper.updateByPrimaryKey(unAssetType);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，更新失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"更新成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO deleteUnAssetType(Integer id) {
+        int code = unAssetTypeMapper.deleteByPrimaryKey(id);
         if(code==0)
             return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，删除失败");
         ResultDTO resultDTO = new ResultDTO();
