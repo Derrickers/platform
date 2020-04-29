@@ -10,4 +10,5 @@ public class UserDTO {
     private String mobile;
     private String email;
     private String token;
+    private String account;
 }

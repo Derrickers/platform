@@ -9,10 +9,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,13 +35,13 @@ public class DeviceService {
     @Autowired
     private UnAssetTypeMapper unAssetTypeMapper;
 
+    @Autowired
+    private UnAssetDeviceMapper unAssetDeviceMapper;
+
     public ResultDTO<PaginationDTO> getDeviceErrorCode(int page, int size, String classification, String code, String query) {
         ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();
         PaginationDTO<List<DeviceErrorCodeDTO>> paginationDTO = new PaginationDTO<>();
         DeviceErrorCodeExample deviceErrorCodeExample = new DeviceErrorCodeExample();
-        long total = deviceErrorCodeMapper.countByExample(deviceErrorCodeExample);
-        paginationDTO.setTotal((int) total);
-        paginationDTO.setPagenum((int) (total / size));
         DeviceErrorCodeExample.Criteria deviceErrorCodeExampleCriteria = deviceErrorCodeExample.createCriteria();
         if (classification != null && !"".equals(classification))
             deviceErrorCodeExampleCriteria.andClassificationEqualTo(classification);
@@ -52,6 +49,9 @@ public class DeviceService {
             deviceErrorCodeExampleCriteria.andErrorCodeLike("%" + code + "%");
         if (query != null && !"".equals(query))
             deviceErrorCodeExampleCriteria.andDescriptionLike("%" + query + "%");
+        long total = deviceErrorCodeMapper.countByExample(deviceErrorCodeExample);
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total / size));
         List<DeviceErrorCode> deviceErrorCodes = deviceErrorCodeMapper.selectByExampleWithRowbounds(deviceErrorCodeExample, new RowBounds((page - 1) * size, size));
         List<DeviceErrorCodeDTO> deviceErrorCodeDTOS = new ArrayList<>();
         deviceErrorCodes.forEach(item -> {
@@ -122,9 +122,6 @@ public class DeviceService {
         PaginationDTO<List<DeviceClassification>> paginationDTO = new PaginationDTO<>();
         DeviceClassificationExample deviceClassificationExample = new DeviceClassificationExample();
         deviceClassificationExample.setOrderByClause("level asc");
-        long total = deviceClassificationMapper.countByExample(deviceClassificationExample);
-        paginationDTO.setTotal((int) total);
-        paginationDTO.setPagenum((int) (total / size));
         DeviceClassificationExample.Criteria deviceClassificationExampleCriteria = deviceClassificationExample.createCriteria();
         if (classification != null && !"".equals(classification))
             deviceClassificationExampleCriteria.andClassificationEqualTo(classification);
@@ -134,6 +131,9 @@ public class DeviceService {
             deviceClassificationExampleCriteria.andLevelEqualTo(level);
         if (query != null && !"".equals(query))
             deviceClassificationExampleCriteria.andClassificationLike("%" + query + "%");
+        long total = deviceClassificationMapper.countByExample(deviceClassificationExample);
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total / size));
         List<DeviceClassification> deviceClassifications = deviceClassificationMapper.selectByExampleWithRowbounds(deviceClassificationExample, new RowBounds((page - 1) * size, size));
         paginationDTO.setData(deviceClassifications);
         ResultDTO resultDTO = new ResultDTO();
@@ -190,9 +190,7 @@ public class DeviceService {
         ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();
         DeviceAssetGoodExample deviceAssetGoodExample = new DeviceAssetGoodExample();
         DeviceAssetGoodExample.Criteria deviceAssetGoodExampleCriteria = deviceAssetGoodExample.createCriteria();
-        long total = deviceAssetGoodMapper.countByExample(deviceAssetGoodExample);
-        paginationDTO.setTotal((int) total);
-        paginationDTO.setPagenum((int) (total / size));
+
         if (affiliation != null && !"".equals(affiliation))
             deviceAssetGoodExampleCriteria.andAffiliationEqualTo(affiliation);
         if (classification != null && !"".equals(classification))
@@ -201,6 +199,9 @@ public class DeviceService {
             deviceAssetGoodExampleCriteria.andManufactureLike("%" + manufacture + "%");
         if (deviceName != null && !"".equals(deviceName))
             deviceAssetGoodExampleCriteria.andDeviceNameLike("%" + deviceName + "%");
+        long total = deviceAssetGoodMapper.countByExample(deviceAssetGoodExample);
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total / size));
         List<DeviceAssetGood> deviceAssetGoods = deviceAssetGoodMapper.selectByExampleWithRowbounds(deviceAssetGoodExample, new RowBounds((page - 1) * size, size));
         List<DeviceAssetGoodDTO> deviceAssetGoodDTOS = new ArrayList<>();
         deviceAssetGoods.forEach(item -> {
@@ -304,15 +305,15 @@ public class DeviceService {
 
     public ResultDTO getAccessoryTypeList(int page, int size, String deviceType, String accessoryType) {
         AccessoryTypeExample accessoryTypeExample = new AccessoryTypeExample();
-        long total = accessoryTypeMapper.countByExample(accessoryTypeExample);
         PaginationDTO<List<AccessoryType>> paginationDTO = new PaginationDTO<>();
-        paginationDTO.setTotal((int) total);
-        paginationDTO.setPagenum((int) (total / size));
         AccessoryTypeExample.Criteria accessoryTypeExampleCriteria = accessoryTypeExample.createCriteria();
         if(deviceType!=null&&!"".equals(deviceType))
             accessoryTypeExampleCriteria.andDeviceTypeEqualTo(deviceType);
         if(accessoryType!=null&&!"".equals(accessoryType))
             accessoryTypeExampleCriteria.andAccessoryTypeNameLike("%"+accessoryType+"%");
+        long total = accessoryTypeMapper.countByExample(accessoryTypeExample);
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total / size));
         List<AccessoryType> accessoryTypes = accessoryTypeMapper.selectByExampleWithRowbounds(accessoryTypeExample, new RowBounds((page - 1) * size, size));
         paginationDTO.setData(accessoryTypes);
         ResultDTO resultDTO = new ResultDTO();
@@ -370,10 +371,7 @@ public class DeviceService {
 
     public ResultDTO getAccessoryDevice(int page, int size, String affiliation, String accessoryName, String accessoryType) {
         AccessoryDeviceExample accessoryDeviceExample = new AccessoryDeviceExample();
-        long total = accessoryDeviceMapper.countByExample(accessoryDeviceExample);
         PaginationDTO<List<AccessoryDevice>> paginationDTO = new PaginationDTO<>();
-        paginationDTO.setTotal((int) total);
-        paginationDTO.setPagenum((int) (total / size));
         AccessoryDeviceExample.Criteria accessoryDeviceExampleCriteria = accessoryDeviceExample.createCriteria();
         if(affiliation!=null&&!"".equals(affiliation))
             accessoryDeviceExampleCriteria.andAffiliationEqualTo(affiliation);
@@ -381,6 +379,9 @@ public class DeviceService {
             accessoryDeviceExampleCriteria.andAccessoryNameLike("%"+accessoryName+"%");
         if(accessoryType!=null&&!"".equals(accessoryType))
             accessoryDeviceExampleCriteria.andAccessoryTypeEqualTo(accessoryType);
+        long total = accessoryDeviceMapper.countByExample(accessoryDeviceExample);
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total / size));
         List<AccessoryDevice> accessoryDevices = accessoryDeviceMapper.selectByExampleWithRowbounds(accessoryDeviceExample, new RowBounds((page - 1) * size, size));
         paginationDTO.setData(accessoryDevices);
         ResultDTO resultDTO = new ResultDTO();
@@ -431,14 +432,14 @@ public class DeviceService {
     public ResultDTO getUnAssetTypeList(int page, int size, String deviceType, String unAssetTypeName) {
         PaginationDTO<List<UnAssetType>> paginationDTO = new PaginationDTO<>();
         UnAssetTypeExample unAssetTypeExample = new UnAssetTypeExample();
-        long total = unAssetTypeMapper.countByExample(unAssetTypeExample);
-        paginationDTO.setTotal((int) total);
-        paginationDTO.setPagenum((int) (total/size));
         UnAssetTypeExample.Criteria unAssetTypeExampleCriteria = unAssetTypeExample.createCriteria();
         if(deviceType!=null&&!"".equals(deviceType))
             unAssetTypeExampleCriteria.andDeviceTypeEqualTo(deviceType);
         if(unAssetTypeName!=null&&!"".equals(unAssetTypeName))
             unAssetTypeExampleCriteria.andUnAssetTypeNameLike("%"+unAssetTypeName+"%");
+        long total = unAssetTypeMapper.countByExample(unAssetTypeExample);
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total/size));
         List<UnAssetType> unAssetTypes = unAssetTypeMapper.selectByExampleWithRowbounds(unAssetTypeExample, new RowBounds((page - 1) * size, size));
         paginationDTO.setData(unAssetTypes);
         ResultDTO resultDTO = new ResultDTO();
@@ -487,6 +488,68 @@ public class DeviceService {
 
     public ResultDTO deleteUnAssetType(Integer id) {
         int code = unAssetTypeMapper.deleteByPrimaryKey(id);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，删除失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"删除成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO getUnAssetDeviceList(int page, int size, String affiliation, String unAssetType, String unAssetDeviceName) {
+        PaginationDTO<List<UnAssetDevice>> paginationDTO = new PaginationDTO<>();
+        UnAssetDeviceExample unAssetDeviceExample = new UnAssetDeviceExample();
+        UnAssetDeviceExample.Criteria unAssetDeviceExampleCriteria = unAssetDeviceExample.createCriteria();
+        if(affiliation!=null&&!"".equals(affiliation))
+            unAssetDeviceExampleCriteria.andAffiliationEqualTo(affiliation);
+        if(unAssetType!=null&&!"".equals(unAssetType))
+            unAssetDeviceExampleCriteria.andUnAssetTypeEqualTo(unAssetType);
+        if(unAssetDeviceName!=null&&!"".equals(unAssetDeviceName))
+            unAssetDeviceExampleCriteria.andUnAssetTypeLike("%"+unAssetType+"%");
+        long total = unAssetDeviceMapper.countByExample(unAssetDeviceExample);
+        paginationDTO.setTotal((int) total);
+        paginationDTO.setPagenum((int) (total/size));
+        List<UnAssetDevice> unAssetDevices = unAssetDeviceMapper.selectByExampleWithRowbounds(unAssetDeviceExample,new RowBounds((page-1)*size,size));
+        paginationDTO.setData(unAssetDevices);
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setData(paginationDTO);
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"获取非资产设备设施列表成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO addNewUnAssetDevice(String affiliation, String unAssetType, String unit, String specification, int count) {
+        UnAssetDevice unAssetDevice = new UnAssetDevice();
+        unAssetDevice.setAffiliation(affiliation);
+        unAssetDevice.setCount(count);
+        unAssetDevice.setSpecification(specification);
+        unAssetDevice.setUnit(unit);
+        unAssetDevice.setUnAssetType(unAssetType);
+        int code = unAssetDeviceMapper.insert(unAssetDevice);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，插入失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"新增成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO modifyUnAssetDevice(int id, String affiliation, String unAssetType, String unit, int count, String specification) {
+        UnAssetDevice unAssetDevice = unAssetDeviceMapper.selectByPrimaryKey(id);
+        if(unAssetDevice==null)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"该条记录已被删除，请重试");
+        unAssetDevice.setAffiliation(affiliation);
+        unAssetDevice.setCount(count);
+        unAssetDevice.setSpecification(specification);
+        unAssetDevice.setUnit(unit);
+        unAssetDevice.setUnAssetType(unAssetType);
+        int code = unAssetDeviceMapper.updateByPrimaryKey(unAssetDevice);
+        if(code==0)
+            return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，更新失败");
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setMeta(MetaDTO.okOf(ResponseType.SUCCESS.getValue(),"更新成功"));
+        return resultDTO;
+    }
+
+    public ResultDTO deleteUnAssetDevice(Integer id) {
+        int code = unAssetDeviceMapper.deleteByPrimaryKey(id);
         if(code==0)
             return ResultDTO.errorOf(ResponseType.FAIL.getValue(),"服务器错误，删除失败");
         ResultDTO resultDTO = new ResultDTO();

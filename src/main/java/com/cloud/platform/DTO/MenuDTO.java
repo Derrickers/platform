@@ -46,7 +46,7 @@ public class MenuDTO {
         menuDTOS.add(generateMenuDTO(3,"设备管理","devices", children2));
         ArrayList<MenuDTO> children3 = new ArrayList<>();
         children3.add(generateMenuDTO(401,"角色管理","roles",new ArrayList<>()));
-        children3.add(generateMenuDTO(402,"用户管理","users",new ArrayList<>()));
+        children3.add(generateMenuDTO(402,"用户管理","accounts",new ArrayList<>()));
         children3.add(generateMenuDTO(403,"日志管理","logs",new ArrayList<>()));
         menuDTOS.add(generateMenuDTO(4,"系统管理","management", children3));
         return menuDTOS;

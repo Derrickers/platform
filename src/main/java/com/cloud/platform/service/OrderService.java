@@ -27,7 +27,6 @@ public class OrderService {
 
     public ResultDTO<PaginationDTO> getRepairOrderList(int page, int size, String query, String type, String affiliation, String status) {
         RepairOrderExample repairOrderExample = new RepairOrderExample();
-        long total = repairOrderMapper.countByExample(repairOrderExample);
         RepairOrderExample.Criteria repairOrderExampleCriteria = repairOrderExample.createCriteria();
         repairOrderExampleCriteria.andDeviceNameLike("%" + query + "%");
         if (type != null && !"".equals(type)) {
@@ -42,6 +41,7 @@ public class OrderService {
         List<RepairOrder> repairOrders = repairOrderMapper.selectByExampleWithRowbounds(repairOrderExample, new RowBounds((page - 1) * size, size));
         ResultDTO<PaginationDTO> resultDTO = new ResultDTO<>();
         PaginationDTO paginationDTO = new PaginationDTO();
+        long total = repairOrderMapper.countByExample(repairOrderExample);
         paginationDTO.setPagenum((int) (total / size));
         paginationDTO.setTotal((int) total);
         paginationDTO.setData(repairOrders);
@@ -52,7 +52,6 @@ public class OrderService {
 
     public ResultDTO<PaginationDTO> getDetectOrder(int page, int size, String query, String date, String affiliation, String server) {
         DetectOrderExample detectOrderExample = new DetectOrderExample();
-        long total = detectOrderMapper.countByExample(detectOrderExample);
         DetectOrderExample.Criteria detectOrderExampleCriteria = detectOrderExample.createCriteria();
         detectOrderExampleCriteria.andOrderIndexLike("%" + query + "%");
         if (date != null && !"".equals(date)) {
@@ -64,6 +63,7 @@ public class OrderService {
         if (server != null && !"".equals(server)) {
             detectOrderExampleCriteria.andServerLike("%" + server + "%");
         }
+        long total = detectOrderMapper.countByExample(detectOrderExample);
         List<DetectOrder> detectOrders = detectOrderMapper.selectByExampleWithRowbounds(detectOrderExample, new RowBounds((page - 1) * size, size));
         List<DetectOrderDTO> detectOrderDTOS = new ArrayList<>();
         detectOrders.forEach(item->{
